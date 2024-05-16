@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.ecoa.technology/sca-extension-2.0" xmlns:sca="http://docs.oasis-open.org/ns/opencsa/sca/200912" xmlns:ecoa-sca="http://www.ecoa.technology/sca-extension-2.0">
+  <xs:import namespace="http://docs.oasis-open.org/ns/opencsa/sca/200912" schemaLocation="ecoa-component-2.0.xsd"/>
+  <xs:element name="interface">
+    <xs:complexType>
+      <xs:attribute name="syntax" use="required" type="xs:NCName"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

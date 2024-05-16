@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!-- Define complex types for each generator -->
+  <xs:complexType name="TypeGenerator">
+    <xs:attribute name="output" type="xs:string" use="required"/>
+    <xs:attribute name="generateInc" type="xs:boolean" use="required"/>
+    <xs:attribute name="seperateLibrary" type="xs:boolean" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="ModuleGenerator">
+    <xs:attribute name="output" type="xs:string" use="required"/>
+    <xs:attribute name="generateInc" type="xs:boolean" use="required"/>
+    <xs:attribute name="generateDirectoryForComponent" type="xs:boolean" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="ContainerGenerator">
+    <xs:attribute name="output" type="xs:string" use="required"/>
+    <xs:attribute name="generateSubDirectory" type="xs:boolean" use="required"/>
+    <xs:attribute name="generateDirectoryForComponent" type="xs:boolean" use="required"/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="EcoaGenericPlatformGenerator">
+    <xs:attribute name="output" type="xs:string" use="required"/>
+    <xs:attribute name="subDirectory" type="xs:string" use="required"/>
+    <xs:attribute name="context" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <!-- Define the root element GeneratorConfiguration -->
+  <xs:element name="GeneratorConfiguration">
+    <xs:complexType>
+      <xs:sequence>
+        <!-- Allow any order of generator elements -->
+        <xs:choice maxOccurs="unbounded">
+          <xs:element name="TypeGenerator" type="TypeGenerator"/>
+          <xs:element name="ModuleGenerator" type="ModuleGenerator"/>
+          <xs:element name="ContainerGenerator" type="ContainerGenerator"/>
+          <xs:element name="EcoaGenericPlatformGenerator" type="EcoaGenericPlatformGenerator"/>
+        </xs:choice>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

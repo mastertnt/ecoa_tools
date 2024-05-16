@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://docs.oasis-open.org/ns/opencsa/sca/200912" xmlns:sca="http://docs.oasis-open.org/ns/opencsa/sca/200912" xmlns:ecoa-sca="http://www.ecoa.technology/sca-extension-2.0">
+  <xs:import namespace="http://www.ecoa.technology/sca-extension-2.0" schemaLocation="ecoa-sca.xsd"/>
+  <xs:element name="componentType">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="sca:service"/>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="sca:reference"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="service">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="sca:interface">
+          <xs:attribute name="name" use="required" type="xs:NCName"/>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="reference">
+    <xs:complexType>
+      <xs:complexContent>
+        <xs:extension base="sca:interface">
+          <xs:attribute name="name" use="required" type="xs:NCName"/>
+        </xs:extension>
+      </xs:complexContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="interface">
+    <xs:sequence>
+      <xs:element ref="ecoa-sca:interface"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

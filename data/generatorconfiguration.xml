@@ -1,0 +1,8 @@
+<GeneratorConfiguration>
+    <TypeGenerator output=".\Dev\Types" generateInc="true" seperateLibrary="true"/>
+    <ModuleGenerator output=".\Dev" generateInc="true" generateDirectoryForComponent="true" />   
+    <ContainerGenerator output=".\Dev" generateSubDirectory="true" generateDirectoryForComponent="true" name="Zero" />
+    <ContainerGenerator output=".\Dev" generateSubDirectory="true" generateDirectoryForComponent="true" name="Generic" />
+    <ContainerGenerator output=".\Dev" generateSubDirectory="true" generateDirectoryForComponent="true" name="Ap2633" />
+    <EcoaGenericPlatformGenerator output=".\Tests" subDirectory="EcoaGenericPlatform" context="INITIAL_ASSEMBLY"/>
+</GeneratorConfiguration>
