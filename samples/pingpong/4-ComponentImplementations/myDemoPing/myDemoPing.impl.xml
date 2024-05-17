@@ -1,0 +1,92 @@
+<componentImplementation 
+    xmlns="http://www.ecoa.technology/implementation-2.0" componentDefinition="Ping">
+	
+    <!-- list of used libraries -->
+  <use library="pingpong"/>
+
+  <!-- module AM to implement provided operations -->
+  <moduleType name="myDemoPing_AM_t">
+    <operations>
+
+    <requestSent name="PingPong" isSynchronous="true" timeout="30.0">
+      <input name="Ping_Target" type="pingpong:T_Target_Position"/>
+      <output name="Pong_Target" type="pingpong:T_Target_Position"/>
+    </requestSent>
+
+    <eventSent name="Ping"/>
+      
+    <eventReceived name="Pong"/>
+
+    <dataRead type="uint32" name="Counter" maxVersions="8"/>
+
+    <eventReceived name="TriggerPingRequest"/>
+    <eventReceived name="TriggerPingEvent"/>
+    <eventReceived name="TriggerPingCounter"/>
+
+    </operations>
+  </moduleType>
+
+  <moduleImplementation name="myDemoPing_AM" language="C" moduleType="myDemoPing_AM_t"/>
+
+  <moduleInstance name="myDemoPing_AM_I" implementationName="myDemoPing_AM" relativePriority="20" />
+
+  <triggerInstance name="Heart_Beat" relativePriority="10" />
+
+
+  <!-- Definition of module operation links for AM module -->
+  <requestLink>
+    <clients>
+      <moduleInstance instanceName="myDemoPing_AM_I" operationName="PingPong"/>
+   </clients>
+    <server>
+      <reference instanceName="svc_PingPong" operationName="PingPong"/>
+    </server>
+  </requestLink>
+
+  <eventLink>
+    <senders>
+      <trigger instanceName="Heart_Beat" period="2.000"/>
+    </senders>
+    <receivers>
+      <moduleInstance instanceName="myDemoPing_AM_I" operationName="TriggerPingRequest"/>
+    </receivers>
+  </eventLink>
+
+  <eventLink>
+    <senders>
+      <trigger instanceName="Heart_Beat" period="3.000"/>
+    </senders>
+    <receivers>
+      <moduleInstance instanceName="myDemoPing_AM_I" operationName="TriggerPingEvent"/>
+      <moduleInstance instanceName="myDemoPing_AM_I" operationName="TriggerPingCounter"/>
+    </receivers>
+  </eventLink>
+
+  <eventLink>
+    <senders>
+      <moduleInstance instanceName="myDemoPing_AM_I" operationName="Ping"/>
+    </senders>
+    <receivers>
+      <reference instanceName="svc_PingPong" operationName="Ping"/>
+    </receivers>
+  </eventLink>
+
+  <eventLink>
+    <senders>
+      <reference instanceName="svc_PingPong" operationName="Pong"/>
+    </senders>
+    <receivers>
+      <moduleInstance instanceName="myDemoPing_AM_I" operationName="Pong"/>
+    </receivers>
+  </eventLink>
+
+  <dataLink>
+    <writers>
+      <reference instanceName="svc_PingPong" operationName="Counter"/>
+    </writers>
+    <readers>
+      <moduleInstance instanceName="myDemoPing_AM_I" operationName="Counter"/>
+    </readers>
+  </dataLink>
+
+</componentImplementation>

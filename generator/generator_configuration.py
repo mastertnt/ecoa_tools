@@ -105,14 +105,14 @@ class TypeGenerator:
 
 @dataclass(repr=False)
 class GeneratorConfiguration:
-    type_generator: Optional[TypeGenerator] = field(
+    type_generator: List[TypeGenerator] = field(
         default=None,
         metadata={
             "name": "TypeGenerator",
             "type": "Element",
         }
     )
-    module_generator: Optional[ModuleGenerator] = field(
+    module_generator: List[ModuleGenerator] = field(
         default=None,
         metadata={
             "name": "ModuleGenerator",
@@ -126,7 +126,7 @@ class GeneratorConfiguration:
             "type": "Element",
         }
     )
-    ecoa_generic_platform_generator: Optional[EcoaGenericPlatformGenerator] = field(
+    ecoa_generic_platform_generator: List[EcoaGenericPlatformGenerator] = field(
         default=None,
         metadata={
             "name": "EcoaGenericPlatformGenerator",

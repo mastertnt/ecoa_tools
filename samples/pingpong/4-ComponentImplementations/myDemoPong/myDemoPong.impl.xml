@@ -1,0 +1,67 @@
+<componentImplementation 
+    xmlns="http://www.ecoa.technology/implementation-2.0" componentDefinition="Pong">
+	
+    <!-- list of used libraries -->
+  <use library="pingpong"/>
+
+  <!-- module AM to implement provided operations -->
+  <moduleType name="myDemoPong_AM_t">
+    <operations>
+
+    <requestReceived name="PingPong">
+      <input name="Ping_Target" type="pingpong:T_Target_Position"/>
+      <output name="Pong_Target" type="pingpong:T_Target_Position"/>
+    </requestReceived>
+
+    <eventReceived name="Ping"/>
+      
+    <eventSent name="Pong"/>
+
+    <dataWritten type="uint32" name="Counter" maxVersions="8"/>
+
+    </operations>
+  </moduleType>
+
+  <moduleImplementation name="myDemoPong_AM" language="C" moduleType="myDemoPong_AM_t"/>
+
+  <moduleInstance name="myDemoPong_AM_I" implementationName="myDemoPong_AM" relativePriority="20" />
+
+
+  <!-- Definition of module operation links for AM Module -->
+  <requestLink>
+    <clients>
+      <service instanceName="svc_PingPong" operationName="PingPong"/>
+   </clients>
+    <server>
+      <moduleInstance instanceName="myDemoPong_AM_I" operationName="PingPong"/>
+    </server>
+  </requestLink>
+
+  <eventLink>
+    <senders>
+      <service instanceName="svc_PingPong" operationName="Ping"/>
+    </senders>
+    <receivers>
+      <moduleInstance instanceName="myDemoPong_AM_I" operationName="Ping"/>
+    </receivers>
+  </eventLink>
+
+  <eventLink>
+    <senders>
+      <moduleInstance instanceName="myDemoPong_AM_I" operationName="Pong"/>
+    </senders>
+    <receivers>
+      <service instanceName="svc_PingPong" operationName="Pong"/>
+    </receivers>
+  </eventLink>
+
+  <dataLink>
+    <writers>
+      <moduleInstance instanceName="myDemoPong_AM_I" operationName="Counter"/>
+    </writers>
+    <readers>
+      <service instanceName="svc_PingPong" operationName="Counter"/>
+    </readers>
+  </dataLink>
+
+</componentImplementation>

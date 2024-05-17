@@ -1,0 +1,18 @@
+<deployment finalAssembly="demo" logicalSystem="logical_system"
+  xmlns="http://www.ecoa.technology/deployment-2.0">
+
+
+  <protectionDomain name="Ping_PD">
+    <executeOn computingNode="machine0" computingPlatform="myPlatform" />
+    <deployedModuleInstance componentName="demoPing" moduleInstanceName="myDemoPing_AM_I" modulePriority="30"/>
+    <deployedTriggerInstance componentName="demoPing" triggerInstanceName="Heart_Beat" triggerPriority="10"/>
+  </protectionDomain>
+
+  <protectionDomain name="Pong_PD">
+    <executeOn computingNode="machine0" computingPlatform="myPlatform" />
+    <deployedModuleInstance componentName="demoPong" moduleInstanceName="myDemoPong_AM_I" modulePriority="30"/>
+  </protectionDomain>
+
+  <platformConfiguration computingPlatform="myPlatform" faultHandlerNotificationMaxNumber="8" />
+
+</deployment>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<library xmlns="http://www.ecoa.technology/types-2.0">
+
+  <types>
+    <constant name="MyConstant" type="float32" value="0.0" comment="Sample documentation for MyConstant"/>
+
+    <enum name="T_Side" type="uint8" comment="Sample documentation for T_Side">
+      <value name="PING" comment="Sample documentation for PING"/>
+      <value name="PONG"/>
+    </enum>
+
+    <simple name="T_Tactical_Item_ID" type="uint32"/>
+    <simple name="T_Angle" type="float32" unit="radian"/>
+
+    <record name="T_2D_Position">
+      <field name="Latitude" type="T_Angle"/>
+      <field name="Longitude" type="T_Angle"/>
+    </record>
+    <simple name="T_Time" type="int64" unit="nanoseconds"/>
+
+    <record name="T_Target_Position" comment="Sample documentation for T_Target_Position" >
+      <field name="Tactical_Item_ID" type="T_Tactical_Item_ID" comment="Sample documentation for Tactical_Item_ID"/>
+      <field name="Location" type="T_2D_Position"/>
+      <field name="Is_Valid" type="boolean8"/>
+    </record>
+
+    <fixedArray name="T_Positions" itemType="T_2D_Position" maxNumber="50" comment="Sample documentation for T_Positions" />
+
+    <array name="T_VarPositions" itemType="T_2D_Position" maxNumber="50" comment="Sample documentation for T_VarPositions" />
+
+  </types>
+</library>
