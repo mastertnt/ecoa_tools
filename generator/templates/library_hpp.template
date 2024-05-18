@@ -1,0 +1,99 @@
+#IFNDEF {{ library_name.upper()  }}_H
+#DEFINE {{ library_name.upper()  }}_H
+
+#include "ECOA.hpp"
+{% for use in library.use -%}
+#include "{{ use.library }}.h"
+{% endfor %}
+
+// Declare constant types.
+{% for constant_type in library.types.constant -%}
+{% if constant_type.comment -%}
+// {{ constant_type.comment -}}
+{% endif %}
+typedef {{ constant_type.type }} {{ constant_type.name }} = {{ constant_type.value }};
+{% endfor %}
+
+// Declare simple.
+{% for simple_type in library.types.simple %}
+{% if simple_type.comment -%}
+// {{ simple_type.comment -}}
+{% endif %}
+typedef {{ simple_type.type }} {{ simple_type.name }};
+static const {{ simple_type.type }} {{ simple_type.name }}_minRange =  0.0;
+static const {{ simple_type.type }} {{ simple_type.name }}_maxRange = 1.0;
+{% endfor %}
+
+// Declare enum.
+{% for enum_type in library.types.enum -%}
+{% if enum_type.comment -%}
+// {{ enum_type.comment -}}
+{% endif %}
+struct {{ enum_type.name }}
+{
+    {{ enum_type.type }} value;
+    enum EnumValues 
+    {
+        {% for enum_value in enum_type.value -%}
+        {% if enum_value.valnum -%}
+        {{ enum_value.name }} = {{ enum_value.valnum }},
+        {% else -%}
+        {{ enum_value.name }},            
+        {% endif -%}     
+        {% endfor %}        
+    };         
+    inline void operator = ({{ enum_type.type }} i) { value = i; }
+    inline operator {{ enum_type.type }}() const { return value; }
+    inline {{ enum_type.name }}(EnumValues v):value(v) {}
+    inline {{ enum_type.name }}():value({{enum_type.value[0].name}}) {}
+}; 
+{% endfor %}
+
+// Declare record types.
+{% for record_type in library.types.record -%}
+// {{ record_type.name }}
+{% if record_type.comment -%}
+// {{ record_type.comment -}}
+{% endif %}
+typedef struct
+{
+    {% for record_value in record_type.field_value -%}
+        {{record_value.type}} {{record_value.name}};
+    {% endfor %}
+} {{ record_type.name }};
+
+{% endfor %}
+
+// Declare variant record types.
+{% for variant_record_type in library.types.variant_record -%}
+// {{ variant_record_type.name -}}
+{% if variant_record_type.comment -%}
+// {{ variant_record_type.comment -}}
+{% endif %}
+{% endfor %}
+
+// Declare fixed array types.
+{% for fixed_array_type in library.types.fixed_array -%}
+// {{ fixed_array_type.name }}
+{% if fixed_array_type.comment -%}
+// {{ fixed_array_type.comment -}}
+{% endif %}
+const ECOA::uint32 {{ fixed_array_type.name }}_MAXSIZE = {{ fixed_array_type.max_number }};
+typedef {{ fixed_array_type.item_type }} {{ fixed_array_type.name }}[{{ fixed_array_type.name }}_MAXSIZE];
+{% endfor %}
+
+// Declare variables array types.
+{% for var_array_type in library.types.array -%}
+// {{ var_array_type.name }}
+{% if var_array_type.comment -%}
+// {{ var_array_type.comment -}}
+{% endif %}
+const ECOA::uint32 {{ var_array_type.name }}_MAXSIZE = {{ var_array_type.max_number }};
+typedef struct 
+{
+    ECOA::uint32 current_size;
+    {{ var_array_type.item_type }} data[{{ var_array_type.name }}_MAXSIZE];
+} {{ var_array_type.name }};
+{% endfor %}
+
+#ENDIF

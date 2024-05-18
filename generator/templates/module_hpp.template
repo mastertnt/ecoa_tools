@@ -1,0 +1,78 @@
+#IFNDEF {{ component_definition_name.upper()  }}_H
+#DEFINE {{ component_definition_name.upper()  }}_H
+
+#include "ECOA.hpp"
+{% for provided_service in component_definition.service -%}
+{% for use_item in services[provided_service.name].use -%}
+#include "{{ use_item.library }}.hpp"
+{% endfor -%}
+{% endfor -%}
+
+{% for required_service in component_definition.reference -%}
+{% for use_item in services[required_service.name].use -%}
+#include "{{ use_item.library }}.hpp"
+{% endfor -%}
+{% endfor %}
+
+//@@BEGIN_CODE:CustomHeaders
+{{tags["CustomHeaders"]}}
+//@@END_CODE:CustomHeaders
+
+class {{ component_definition_name }}
+{
+public:
+    /**
+     * Initialize received from the platform.
+     */
+    void INITIALIZE__received();
+
+    /**
+     * Start received from the platform.
+     */
+    void START__received();
+
+    /**
+     * Stop received from the platform.
+     */
+    void STOP__received();
+
+    /**
+     * Shutdown received from the platform.
+     */
+    void SHUTDOWN__received();
+
+    // Generate all provided services methods.
+    {% for provided_service in component_definition.service -%}
+    // {{ provided_service.name }}
+    {% for event in services[provided_service.name].operations.event -%}
+    // {{ event.name }} event
+    void {{ event.name}}__received();
+    {% endfor %}
+    {% for data in services[provided_service.name].operations.data -%}
+    // {{ data.name }} data
+    void {{data.name}}__updated();
+    {% endfor %}
+    {% endfor %}
+
+    // Generate all required services methods.
+    {% for required_service in component_definition.reference -%}
+    // {{ required_service.name }}
+    {% for event in services[required_service.name].operations.event -%}
+    // {{ event.name }} event
+    void {{ event.name}}__received();
+    {% endfor %}
+    {% for data in services[required_service.name].operations.data -%}
+    // {{ data.name }} data
+    void {{data.name}}__updated();
+    {% endfor %}
+    {% endfor %}
+
+    // the Module Implementation shall hold a Container pointer which is passed within the constructor
+    Container* container;
+
+//@@BEGIN_CODE:CustomDeclarations
+{{tags["CustomDeclarations"]}}
+//@@END_CODE:CustomDeclarations
+};
+
+#ENDIF

@@ -1,8 +1,8 @@
 <GeneratorConfiguration>
-    <TypeGenerator output="D:\Projects\DaV\ecoa_tools\output\Types" generateInc="true" seperateLibrary="true"/>
-    <ModuleGenerator output=".\Dev" generateInc="true" generateDirectoryForComponent="true" />   
-    <ContainerGenerator output=".\Dev" generateSubDirectory="true" generateDirectoryForComponent="true" name="Zero" />
-    <ContainerGenerator output=".\Dev" generateSubDirectory="true" generateDirectoryForComponent="true" name="Generic" />
-    <ContainerGenerator output=".\Dev" generateSubDirectory="true" generateDirectoryForComponent="true" name="Ap2633" />
-    <EcoaGenericPlatformGenerator output=".\Tests" subDirectory="EcoaGenericPlatform" />
+    <TypeGenerator output="D:\Projects\DaV\ecoa_tools\output\Types" generateSubDirectory="true" generateDirectoryPerLibrary="true" name="Library"/>
+    <ModuleGenerator output="D:\Projects\DaV\ecoa_tools\output" generateSubDirectory="true" generateDirectoryPerComponent="true"  name="" />
+    <ContainerGenerator output="D:\Projects\DaV\ecoa_tools\output" generateSubDirectory="true" generateDirectoryPerComponent="true" name="Zero" />
+    <ContainerGenerator output="D:\Projects\DaV\ecoa_tools\output" generateSubDirectory="true" generateDirectoryPerComponent="true" name="Generic" />
+    <ContainerGenerator output="D:\Projects\DaV\ecoa_tools\output" generateSubDirectory="true" generateDirectoryPerComponent="true" name="Ap2633" />
+    <TestsGenerator output="D:\Projects\DaV\ecoa_tools\output\Tests" subDirectory="EcoaGenericPlatform" name="GenericPlatform" />
 </GeneratorConfiguration>

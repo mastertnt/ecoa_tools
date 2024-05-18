@@ -5,26 +5,24 @@ from typing import List, Optional
 @dataclass(repr=False)
 class ContainerGenerator:
     output: Optional[str] = field(
-        default=None,
+        default=".",
         metadata={
             "type": "Attribute",
         }
     )
-    generate_sub_directory: Optional[bool] = field(
-        default=None,
+    generateSubDirectory: Optional[bool] = field(
+        default=False,
         metadata={
-            "name": "generateSubDirectory",
             "type": "Attribute",
         }
     )
-    generate_directory_for_component: Optional[bool] = field(
-        default=None,
+    generateDirectoryPerComponent: Optional[bool] = field(
+        default=False,
         metadata={
-            "name": "generateDirectoryForComponent",
             "type": "Attribute",
         }
     )
-    name: Optional[str] = field(
+    name: str = field(
         default=None,
         metadata={
             "type": "Attribute",
@@ -33,21 +31,20 @@ class ContainerGenerator:
 
 
 @dataclass(repr=False)
-class EcoaGenericPlatformGenerator:
+class TestsGenerator:
     output: Optional[str] = field(
-        default=None,
+        default=".",
         metadata={
             "type": "Attribute",
         }
     )
-    sub_directory: Optional[str] = field(
-        default=None,
+    generateSubDirectory: Optional[bool] = field(
+        default=False,
         metadata={
-            "name": "subDirectory",
             "type": "Attribute",
         }
     )
-    context: Optional[str] = field(
+    name: str = field(
         default=None,
         metadata={
             "type": "Attribute",
@@ -58,22 +55,26 @@ class EcoaGenericPlatformGenerator:
 @dataclass(repr=False)
 class ModuleGenerator:
     output: Optional[str] = field(
-        default=None,
+        default=".",
         metadata={
             "type": "Attribute",
         }
     )
-    generate_inc: Optional[bool] = field(
-        default=None,
+    generateSubDirectory: Optional[bool] = field(
+        default=False,
         metadata={
-            "name": "generateInc",
             "type": "Attribute",
         }
     )
-    generate_directory_for_component: Optional[bool] = field(
+    generateDirectoryPerComponent: Optional[bool] = field(
+        default=False,
+        metadata={
+            "type": "Attribute",
+        }
+    )
+    name: str = field(
         default=None,
         metadata={
-            "name": "generateDirectoryForComponent",
             "type": "Attribute",
         }
     )
@@ -82,22 +83,26 @@ class ModuleGenerator:
 @dataclass(repr=False)
 class TypeGenerator:
     output: Optional[str] = field(
-        default=None,
+        default=".",
         metadata={
             "type": "Attribute",
         }
     )
-    generate_inc: Optional[bool] = field(
-        default=None,
+    generateSubDirectory: Optional[bool] = field(
+        default=False,
         metadata={
-            "name": "generateInc",
             "type": "Attribute",
         }
     )
-    seperate_library: Optional[bool] = field(
+    generateDirectoryPerLibrary: Optional[bool] = field(
+        default=False,
+        metadata={
+            "type": "Attribute",
+        }
+    )
+    name: str = field(
         default=None,
         metadata={
-            "name": "seperateLibrary",
             "type": "Attribute",
         }
     )
@@ -126,10 +131,10 @@ class GeneratorConfiguration:
             "type": "Element",
         }
     )
-    ecoa_generic_platform_generator: List[EcoaGenericPlatformGenerator] = field(
+    ecoa_tests_generator: List[TestsGenerator] = field(
         default=None,
         metadata={
-            "name": "EcoaGenericPlatformGenerator",
+            "name": "TestsGenerator",
             "type": "Element",
         }
     )

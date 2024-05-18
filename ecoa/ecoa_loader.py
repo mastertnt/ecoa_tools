@@ -1,4 +1,5 @@
 import os
+import pickle
 from enum import Enum
 
 from xsdata.formats.dataclass.parsers import XmlParser
@@ -22,13 +23,16 @@ class EcoaLoader:
     def __init__(self):
         self.mode = EcoaLoaderMode.UNKNOWN
         self.libraries = []
-        self.services = []
-        self.component_definitions = []
+        self.libraryFilenames = {}
+        self.services = {}
+        self.serviceFilenames = {}
+        self.componentDefinitions = []
+        self.componentDefinitionFilenames = {}
 
-    def loadFromDirectory(self, dir):
+    def loadFromDirectory(self, root_directory):
         self.mode = EcoaLoaderMode.UNKNOWN
 
-        for dir_entry in os.listdir(dir):
+        for dir_entry in os.listdir(root_directory):
             if dir_entry == "0-Types":
                 mode = EcoaLoaderMode.TYPES
             if dir_entry == "1-Services" and mode.value >= 1:
@@ -43,35 +47,42 @@ class EcoaLoader:
                 mode = EcoaLoaderMode.INTEGRATION
 
         # Read all the libraries into 0-Types
-        types_directory = os.path.join(dir, "0-Types")
+        types_directory = os.path.join(root_directory, "0-Types")
         for types_dir_entry in os.listdir(types_directory):
+            library_filename = os.path.join(types_directory, types_dir_entry)
             try:
                 parser = XmlParser()
-                library = parser.parse(os.path.join(types_directory, types_dir_entry), Library)
+                library = parser.parse(library_filename, Library)
                 self.libraries.append(library)
+                self.libraryFilenames[pickle.dumps(library)] = library_filename
             except:
-                print("Cannot parse the library file : " + os.path.join(types_directory, types_dir_entry))
+                print("Cannot parse the library file : " + library_filename)
 
         # Read all services into 1-Services
-        services_directory = os.path.join(dir, "1-Services")
+        services_directory = os.path.join(root_directory, "1-Services")
         self.loadServicesDirectory(services_directory)
 
-        # Read all component definitions
-        component_definitions_directory = os.path.join(dir, "2-ComponentDefinitions")
+        # Read all component definitions into "2-ComponentDefinitions"
+        component_definitions_directory = os.path.join(root_directory, "2-ComponentDefinitions")
         self.loadComponentDefinitionDirectory(component_definitions_directory)
 
-    def loadServicesDirectory(self, dir):
-        for services_dir_entry in os.listdir(dir):
-            full_path = os.path.join(dir, services_dir_entry)
+    def loadServicesDirectory(self, service_directory):
+        for services_dir_entry in os.listdir(service_directory):
+            full_path = os.path.join(service_directory, services_dir_entry)
             try:
                 parser = XmlParser()
                 service = parser.parse(full_path, ServiceDefinition)
-                self.services.append(service)
+                service_name = os.path.basename(full_path)
+                service_name = service_name.split('.')[0]
+                print("service_name " + service_name)
+                self.services[service_name] = service
+                self.serviceFilenames[pickle.dumps(service)] = full_path
             except:
                 print("Cannot parse the service file : " + full_path)
-    def loadComponentDefinitionDirectory(self, dir):
-        for component_definition_dir_entry in os.listdir(dir):
-            full_path = os.path.join(dir, component_definition_dir_entry)
+
+    def loadComponentDefinitionDirectory(self, component_definition_directory):
+        for component_definition_dir_entry in os.listdir(component_definition_directory):
+            full_path = os.path.join(component_definition_directory, component_definition_dir_entry)
             if os.path.isfile(full_path):
                 self.loadComponentDefinitionFile(full_path)
             else:
@@ -81,6 +92,8 @@ class EcoaLoader:
         try:
             parser = XmlParser()
             component_definition = parser.parse(file, ComponentType)
-            self.component_definitions.append(component_definition)
+            print("Add component type : " + file)
+            self.componentDefinitions.append(component_definition)
+            self.componentDefinitionFilenames[pickle.dumps(component_definition)] = file
         except:
             print("Cannot parse the component definition file : " + file)

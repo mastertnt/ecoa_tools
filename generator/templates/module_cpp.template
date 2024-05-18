@@ -1,0 +1,92 @@
+#include "{{ component_definition_name.upper()  }}.hpp"
+//@@BEGIN_CODE:CustomBodyHeaders
+{{tags["CustomBodyHeaders"]-}}
+//@@END_CODE
+
+void {{ component_definition_name }}::INITIALIZE__received()
+{
+    // Code between the tags BEGIN/END to avoid lost of data.
+    //@@BEGIN_CODE:INITIALIZE__received
+    {{tags["INITIALIZE__received"]}}
+    //@@END_CODE
+}
+
+void {{ component_definition_name }}::START__received()
+{
+    // Code between the tags BEGIN/END to avoid lost of data.
+    //@@BEGIN_CODE:START__received
+    {{tags["START__received"]}}
+    //@@END_CODE
+}
+
+void {{ component_definition_name }}::STOP__received()
+{
+    // Code between the tags BEGIN/END to avoid lost of data.
+    //@@BEGIN_CODE:STOP__received
+    {{tags["STOP__received"]}}
+    //@@END_CODE
+}
+
+void {{ component_definition_name }}::SHUTDOWN__received()
+{
+    // Code between the tags BEGIN/END to avoid lost of data.
+    //@@BEGIN_CODE:SHUTDOWN__received
+    {{tags["SHUTDOWN__received"]}}
+    //@@END_CODE
+}
+
+
+// Generate all provided services methods.
+{% for provided_service in component_definition.service -%}
+// {{ provided_service.name }}
+{% for event in services[provided_service.name].operations.event %}
+// {{ event.name }} event
+void {{ component_definition_name }}::{{ event.name}}__received()
+{
+    // Code between the tags BEGIN/END to avoid lost of data.
+    //@@BEGIN_CODE:{{event.name}}__received
+    {{tags[event.name__received]}}
+    //@@END_CODE
+}
+{% endfor %}
+{% for data in services[provided_service.name].operations.data %}
+// {{ data.name }} data
+void {{ component_definition_name }}::{{data.name}}__updated()
+{
+    // Code between the tags BEGIN/END to avoid lost of data.
+    //@@BEGIN_CODE:{{data.name}}
+    {{tags[data.name]}}
+    //@@END_CODE
+}
+{% endfor %}
+{% endfor %}
+
+// Generate all required services methods.
+{% for required_service in component_definition.reference -%}
+// {{ required_service.name }}
+{% for event in services[required_service.name].operations.event %}
+// {{ event.name }} event
+void {{ component_definition_name }}::{{ event.name}}__received()
+{
+    // Code between the tags BEGIN/END to avoid lost of data.
+    //@@BEGIN_CODE:{{event.name}}__received
+    {{tags[event.name__received]}}
+    //@@END_CODE
+}
+{% endfor %}
+{% for data in services[required_service.name].operations.data %}
+// {{ data.name }} data
+void {{ component_definition_name }}::{{data.name}}__updated()
+{
+    // Code between the tags BEGIN/END to avoid lost of data.
+    //@@BEGIN_CODE:{{data.name}}__received
+    {{tags[data.name__received]}}
+    //@@END_CODE
+}
+{% endfor %}
+{% endfor %}
+
+// Code between the tags BEGIN/END to avoid lost of data.
+//@@BEGIN_CODE:CustomBody
+{{tags["CustomBody"]}}
+//@@END_CODE

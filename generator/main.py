@@ -1,5 +1,8 @@
 import dataclasses
 import os
+import pickle
+import re
+from pathlib import Path
 
 import inflection
 import stringcase
@@ -41,13 +44,6 @@ console_handler.setFormatter(colorlog.ColoredFormatter(
 # Add the handler to the logger
 logger.addHandler(console_handler)
 
-# Examples of logging messages
-# logger.debug('This is a debug message')
-# logger.info('This is an info message')
-# logger.warning('This is a warning message')
-# logger.error('This is an error message')
-# logger.critical('This is a critical message')
-
 current_directory = os.getcwd()
 logger.info("Start generator from : " + current_directory)
 
@@ -61,138 +57,136 @@ parser = XmlParser()
 generatorConfiguration = parser.parse(r"D:\Projects\DaV\ecoa_tools\data\generatorconfiguration.xml",
                                       GeneratorConfiguration)
 
-# First, generate all the types.
+# First, generate the libraries.
 for generator in generatorConfiguration.type_generator:
-    template_code = """
-    #IFNDEF {{ library_name }}_H
-    #DEFINE {{ library_name }}_H
-    
-    #include "ECOA.h"
-    {% for use in library.use -%}
-    #include "{{ use.library }}.h"
-    {% endfor %}
-    
-    // Declare constant types.
-    {% for constant_type in library.types.constant -%}
-    {% if constant_type.comment -%}
-    // {{ constant_type.comment -}}
-    {% endif %}
-    typedef {{ constant_type.type }} {{ constant_type.name }} = {{ constant_type.value }}
-    {% endfor %}
-    
-    // Declare simple.
-    {% for simple_type in library.types.simple %}
-    {% if simple_type.comment -%}
-    // {{ simple_type.comment -}}
-    {% endif %}
-    typedef {{ simple_type.type }} {{ simple_type.name }};
-    static const {{ simple_type.type }} {{ simple_type.name }}_minRange =  0.0;
-    static const {{ simple_type.type }} {{ simple_type.name }}_maxRange = 1.0;
-    {% endfor %}
-    
-    // Declare enum.
-    {% for enum_type in library.types.enum -%}
-    {% if enum_type.comment -%}
-    // {{ enum_type.comment -}}
-    {% endif %}
-    struct {{ enum_type.name }}
-    {
-        {{ enum_type.type }} value;
-        enum EnumValues 
-        {
-            {% for enum_value in enum_type.value -%}
-            {% if enum_value.valnum -%}
-            {{ enum_value.name }} = {{ enum_value.valnum }},
-            {% else -%}
-            {{ enum_value.name }},            
-            {% endif -%}     
-            {% endfor %}        
-        };         
-        inline void operator = ({{ enum_type.type }} i) { value = i; }
-        inline operator {{ enum_type.type }}() const { return value; }
-        inline {{ enum_type.name }}(EnumValues v):value(v) {}
-        inline {{ enum_type.name }}():value({{enum_type.value[0].name}}) {}
-    }; 
-    {% endfor %}
-    
-    // Declare record types.
-    {% for record_type in library.types.record -%}
-    // {{ record_type.name }}
-    {% if record_type.comment -%}
-    // {{ record_type.comment -}}
-    {% endif %}
-    typedef struct
-    {
-        {% for record_value in record_type.field_value -%}
-            {{record_value.type}} {{record_value.name}};
-        {% endfor %}
-    } {{ record_type.name }};
-    
-    {% endfor %}
-    
-    // Declare variant record types.
-    {% for variant_record_type in library.types.variant_record -%}
-    // {{ variant_record_type.name -}}
-    {% if variant_record_type.comment -%}
-    // {{ variant_record_type.comment -}}
-    {% endif %}
-    {% endfor %}
-    
-    // Declare fixed array types.
-    {% for fixed_array_type in library.types.fixed_array -%}
-    // {{ fixed_array_type.name }}
-    {% if fixed_array_type.comment -%}
-    // {{ fixed_array_type.comment -}}
-    {% endif %}
-    const ECOA::uint32 {{ fixed_array_type.name }}_MAXSIZE = {{ fixed_array_type.max_number }};
-    typedef {{ fixed_array_type.item_type }} {{ fixed_array_type.name }}[{{ fixed_array_type.name }}_MAXSIZE];
-    {% endfor %}
-    
-    // Declare variables array types.
-    {% for var_array_type in library.types.array -%}
-    // {{ var_array_type.name }}
-    {% if var_array_type.comment -%}
-    // {{ var_array_type.comment -}}
-    {% endif %}
-    const ECOA::uint32 {{ var_array_type.name }}_MAXSIZE = {{ var_array_type.max_number }};
-    typedef struct 
-    {
-        ECOA::uint32 current_size;
-        {{ var_array_type.item_type }} data[{{ var_array_type.name }}_MAXSIZE];
-    } {{ var_array_type.name }};
-    {% endfor %}
-    
-    #ENDIF    
-    """
-
     if os.path.isdir(generator.output):
         logger.info("Generate types in " + generator.output)
         for library in loader.libraries:
-            base_library_path = os.path.join(generator.output, inflection.camelize("pingpongLibrary"))
-            if not os.path.isdir(base_library_path):
-                os.mkdir(base_library_path)
-            if generator.generate_inc:
-                src_full_library_path = os.path.join(base_library_path, inflection.camelize("src"))
-                if not os.path.isdir(src_full_library_path):
-                    os.mkdir(src_full_library_path)
-                inc_full_library_path = os.path.join(base_library_path, inflection.camelize("inc"))
-                if not os.path.isdir(src_full_library_path):
-                    os.mkdir(inc_full_library_path)
-                base_library_path = inc_full_library_path
-            # Now, re-generate .H and CPP
-            header_file_path = os.path.join(base_library_path, "pingpong.h")
+            # TODO : Make a public method to retrieve a non-hashable object.
+            library_name = os.path.basename(loader.libraryFilenames[pickle.dumps(library)])
+            library_name = library_name.split('.')[0]
+            logger.info("Generate library " + library_name)
+            library_name = inflection.camelize(library_name)
+            base_generation_path = os.path.join(generator.output, library_name + "Library")
+            if not os.path.isdir(base_generation_path):
+                os.mkdir(base_generation_path)
+            if generator.generateSubDirectory:
+                base_generation_src_path = os.path.join(base_generation_path, inflection.camelize("src"))
+                if not os.path.isdir(base_generation_src_path):
+                    os.mkdir(base_generation_src_path)
+                base_generation_inc_path = os.path.join(base_generation_path, inflection.camelize("inc"))
+                if not os.path.isdir(base_generation_inc_path):
+                    os.mkdir(base_generation_inc_path)
+            # Now, re-generate .HPP and CPP
+            header_file_path = os.path.join(base_generation_inc_path, library_name + ".hpp")
             logger.info("Generate header file " + header_file_path)
-            #template = load_template("./templates/types.template")
-            template = Template(template_code)
-            generated_code = template.render(library_name="pingpong", library=library)
-            logger.debug(generated_code)
+            if library_name == "Ecoa":
+                template = load_template("templates/library_hpp.template")
+            else:
+                template = load_template("templates/library_hpp.template")
+            generated_code = template.render(library_name=library_name, library=library)
+            if os.path.isfile(header_file_path):
+                os.remove(header_file_path)
+            header_file = open(header_file_path, "x")
+            header_file.write(generated_code)
+            header_file.close()
+            logger.info("Library " + library_name + " correctly generated in " + base_generation_path)
+            #logger.debug(generated_code)
 
 # Second, generate the modules
 for generator in generatorConfiguration.module_generator:
     if os.path.isdir(generator.output):
-        logger.info("toto"
-                    ""
-                    "")
+        logger.info("Generate modules in " + generator.output)
+        for component_definition in loader.componentDefinitions:
+            #for component_definition in component_definitions:
+            # TODO : Make a public method to retrieve a non-hashable object.
+            component_definition_name = os.path.basename(loader.componentDefinitionFilenames[pickle.dumps(component_definition)])
+            component_definition_name = component_definition_name.split('.')[0]
+            logger.info("Generate component definition " + component_definition_name)
+            base_generation_path = generator.output
+            base_generation_inc_path = generator.output
+            base_generation_src_path = generator.output
+            if generator.generateDirectoryPerComponent:
+                base_generation_path = os.path.join(generator.output, component_definition_name)
+                if not os.path.isdir(base_generation_path):
+                    os.mkdir(base_generation_path)
+            if generator.generateSubDirectory:
+                base_generation_src_path = os.path.join(base_generation_path, inflection.camelize("src"))
+                if not os.path.isdir(base_generation_src_path):
+                    os.mkdir(base_generation_src_path)
+                base_generation_inc_path = os.path.join(base_generation_path, inflection.camelize("inc"))
+                if not os.path.isdir(base_generation_inc_path):
+                    os.mkdir(base_generation_inc_path)
+            # Now, re-generate .HPP
+            header_file_path = os.path.join(base_generation_inc_path, component_definition_name + ".hpp")
+            logger.info("Generate header file " + header_file_path)
+            template = load_template("templates/module_hpp.template")
+            tags = {}
+            if os.path.isfile(header_file_path):
+                header_file = open(header_file_path)
+                generated_code = header_file.read()
+                logger.debug(generated_code)
+                result = re.search('@@BEGIN_CODE(.*)@@END_CODE', generated_code, re.MULTILINE)
+                logger.debug(result)
+                begin_pos = generated_code.find('//@@BEGIN_CODE')
+                end_pos = generated_code.find('//@@END_CODE')
+
+                while begin_pos != -1 and end_pos != -1:
+                    extracted = generated_code[begin_pos:end_pos]
+                    lines = extracted.split('\n')
+                    tag = ""
+                    user_code = ""
+                    if len(lines) > 1:
+                        tag = lines[0].split(':')[1]
+                        lines.pop(0)
+                        user_code = '\n'.join(lines).strip()
+                    logger.debug("tag is " + tag)
+                    logger.debug("usercode is " + user_code)
+                    tags[tag.strip()] = user_code
+                    begin_pos = generated_code.find('//@@BEGIN_CODE', end_pos + 1)
+                    end_pos = generated_code.find('//@@END_CODE', end_pos + 1)
+                header_file.close()
+                os.remove(header_file_path)
+            generated_code = template.render(component_definition_name=component_definition_name, tags = tags, component_definition=component_definition, services=loader.services)
+            header_file = open(header_file_path, "x")
+            header_file.write(generated_code)
+            header_file.close()
+            # Now, re-generate .CPP
+            source_file_path = os.path.join(base_generation_src_path, component_definition_name + ".cpp")
+            logger.info("Generate source file " + source_file_path)
+            template = load_template("templates/module_cpp.template")
+            tags = {}
+            if os.path.isfile(source_file_path):
+                source_file = open(source_file_path)
+                generated_code = source_file.read()
+                logger.debug(generated_code)
+                result = re.search('@@BEGIN_CODE(.*)@@END_CODE', generated_code, re.MULTILINE)
+                logger.debug(result)
+                begin_pos = generated_code.find('//@@BEGIN_CODE')
+                end_pos = generated_code.find('//@@END_CODE')
+
+                while begin_pos != -1 and end_pos != -1:
+                    extracted = generated_code[begin_pos:end_pos]
+                    lines = extracted.split('\n')
+                    tag = ""
+                    user_code = ""
+                    if len(lines) > 1:
+                        tag = lines[0].split(':')[1]
+                        lines.pop(0)
+                        user_code = '\n'.join(lines).strip()
+                    logger.debug("tag is " + tag)
+                    logger.debug("usercode is " + user_code)
+                    tags[tag.strip()] = user_code
+                    begin_pos = generated_code.find('//@@BEGIN_CODE', end_pos + 1)
+                    end_pos = generated_code.find('//@@END_CODE', end_pos + 1)
+                source_file.close()
+                os.remove(source_file_path)
+            generated_code = template.render(component_definition_name=component_definition_name, tags=tags, component_definition=component_definition, services=loader.services)
+            source_file = open(source_file_path, "x")
+            source_file.write(generated_code)
+            source_file.close()
+
+            logger.info("Component definition " + component_definition_name + " correctly generated in " + base_generation_path)
     else:
         logger.error("The output directory for module does not exist " + generator.output)
 
